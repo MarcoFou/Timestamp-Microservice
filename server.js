@@ -1,8 +1,7 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
-
 const app = express();
+
 app.use(cors());
 app.use(express.static('public'));
 
@@ -13,25 +12,26 @@ app.get('/', (req, res) => {
 app.get('/api/:date?', (req, res) => {
   const { date } = req.params;
 
-  // caso: parámetro ausente -> fecha actual
-  if (date === undefined) {
-    const now = new Date();
-    return res.json({ unix: now.getTime(), utc: now.toUTCString() });
+  let d;
+  if (!date) {
+    d = new Date();
+  } else if (/^\d+$/.test(date)) {
+    d = new Date(Number(date));
+  } else {
+    d = new Date(date);
   }
 
-  // si es sólo dígitos, tratar como timestamp en ms
-  const isNumeric = /^\d+$/.test(date);
-
-  const parsedDate = isNumeric ? new Date(Number(date)) : new Date(date);
-
-  if (parsedDate.toString() === 'Invalid Date') {
+  if (d.toString() === 'Invalid Date') {
     return res.json({ error: 'Invalid Date' });
   }
 
-  return res.json({ unix: parsedDate.getTime(), utc: parsedDate.toUTCString() });
+  return res.json({
+    unix: d.getTime(),
+    utc: d.toUTCString()
+  });
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server running on ${PORT}`);
 });
