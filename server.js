@@ -12,22 +12,26 @@ app.get('/', (req, res) => {
 app.get('/api/:date?', (req, res) => {
   const { date } = req.params;
 
-  let d;
+  let dateObj;
+  
   if (!date) {
-    d = new Date();
-  } else if (/^\d+$/.test(date)) {
-    d = new Date(Number(date));
+    dateObj = new Date();
   } else {
-    d = new Date(date);
+    // Check if it's a Unix timestamp (numeric string)
+    if (/^\d+$/.test(date)) {
+      dateObj = new Date(parseInt(date));
+    } else {
+      dateObj = new Date(date);
+    }
   }
 
-  if (d.toString() === 'Invalid Date') {
-    return res.json({ error: 'Invalid Date' });
+  if (isNaN(dateObj.getTime())) {
+    return res.json({ error: "Invalid Date" });
   }
 
-  return res.json({
-    unix: d.getTime(),
-    utc: d.toUTCString()
+  res.json({
+    unix: dateObj.getTime(),
+    utc: dateObj.toUTCString()
   });
 });
 
